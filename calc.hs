@@ -1,5 +1,5 @@
 {- 
-As a Hokie, I, <YOUR NAME GOES HERE> ,  will conduct myself with honor and integrity at all times.  
+As a Hokie, I, Dylan Mathews,  will conduct myself with honor and integrity at all times.  
 I will not lie, cheat, or steal, nor will I accept the actions of those who do.”
 
 """
@@ -56,6 +56,24 @@ stringToFloat a = read a :: Float
 
 -- Your implementation goes here. Feel free to add more functions.
 evaluate :: [String] -> String
-evaluate (a:xs) = unwords (a:xs)
-evaluate [] = ""
+evaluate tokens =
+        case process tokens [] of
+                Left err -> err
+                Right [x] -> show x
+                Right _ -> "ERROR: Too few operations"
+
+process :: [String] -> [Float] -> Either String [Float]
+process [] stack = Right stack
+process (t:ts) stack
+        | t `elem` ["+", "-", "*", "/"] && length stack < 2 = Left "ERROR: Too few operands"
+        | t `elem` ["+", "-", "*", "/"] = let (x:y:rest) = stack in
+                case t of
+                        "+" -> process ts ((y + x) : rest)
+                        "-" -> process ts ((y - x) : rest)
+                        "*" -> process ts ((y * x) : rest)
+                        "/" -> case x of
+                                0 -> Left "ERROR: Division by zero"
+                                _ -> process ts ((y / x) : rest)
+        | otherwise = process ts (stringToFloat t : stack)
+
 
